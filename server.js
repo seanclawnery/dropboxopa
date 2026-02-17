@@ -99,7 +99,6 @@ app.get('/auth/callback', async (req, res) => {
       code: code,
       redirect_uri: pkceData.redirectUri,
       client_id: pkceData.clientId,
-      client_secret: '', // Client secret is not required for OAuth 2.0 PKCE flow
       code_verifier: pkceData.verifier
     });
 
