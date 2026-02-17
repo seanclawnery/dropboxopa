@@ -133,6 +133,6 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen( () => {
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+app.listen(3000, () => {
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
