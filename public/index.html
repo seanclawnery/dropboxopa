@@ -245,7 +245,7 @@
             </div>
             <div class="form-group">
                 <label for="redirectUri">Redirect URI:</label>
-                <input type="text" id="redirectUri" placeholder="http://localhost:3001/auth/callback" required>
+                <input type="text" id="redirectUri" placeholder="https://your-app-domain/" required>
             </div>
             <div class="form-group">
                 <label for="scopes">Scopes (optional):</label>
@@ -293,6 +293,10 @@
                 this.redirectUriInput = document.getElementById('redirectUri');
                 this.scopesInput = document.getElementById('scopes');
 
+                if (!this.redirectUriInput.value) {
+                    this.redirectUriInput.value = `${window.location.origin}/`;
+                }
+
                 this.configureButton.addEventListener('click', () => this.configureAndLogin());
                 this.loginButton.addEventListener('click', () => this.login());
                 this.copyButton.addEventListener('click', () => this.copyToken());
@@ -315,7 +319,7 @@
                 try {
                     new URL(redirectUri);
                 } catch {
-                    alert('Please enter a valid Redirect URI (e.g., http://localhost:3001/auth/callback)');
+                    alert('Please enter a valid Redirect URI (e.g., https://your-app-domain/)');
                     return;
                 }
 
@@ -377,24 +381,33 @@
             async checkOAuthCallback() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
+                const state = urlParams.get('state');
                 const error = urlParams.get('error');
 
                 if (code) {
+                    if (!state) {
+                        this.setStatus('Authentication failed: Missing state parameter', 'error');
+                        return;
+                    }
+
                     this.setStatus('Processing authentication...', 'pending');
-                    await this.handleOAuthCallback(code);
+                    await this.handleOAuthCallback(code, state);
                 } else if (error) {
                     this.setStatus('Authentication failed: ' + error, 'error');
                 }
             }
 
-            async handleOAuthCallback(code) {
+            async handleOAuthCallback(code, state) {
                 try {
-                    const response = await fetch(`${this.apiBase}/auth/callback?code=${code}`);
+                    const response = await fetch(
+                        `${this.apiBase}/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`
+                    );
                     const data = await response.json();
 
                     if (data.success) {
                         this.displayToken(data.token);
                         this.setStatus('Successfully authenticated with Dropbox!', 'success');
+                        window.history.replaceState({}, document.title, window.location.pathname);
                     } else {
                         this.setStatus('Authentication failed: ' + data.error, 'error');
                     }
