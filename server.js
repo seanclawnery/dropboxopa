@@ -94,13 +94,23 @@ app.get('/auth/callback', async (req, res) => {
     pkceStore.delete(state);
 
     // Exchange authorization code for access token
-    const tokenResponse = await axios.post('https://api.dropboxapi.com/oauth2/token', {
+    const tokenParams = new URLSearchParams({
       grant_type: 'authorization_code',
       code: code,
       redirect_uri: pkceData.redirectUri,
       client_id: pkceData.clientId,
       code_verifier: pkceData.verifier
     });
+
+    const tokenResponse = await axios.post(
+      'https://api.dropboxapi.com/oauth2/token',
+      tokenParams.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
 
     // Send token back to the frontend
     res.json({
