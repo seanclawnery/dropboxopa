@@ -423,8 +423,9 @@
                 
                 // Display token information
                 const tokenInfo = {
-                    'Access Token': token.access_token ? '✓ Available' : '❌ Missing',
-                    'Refresh Token': token.refresh_token ? '✓ Available' : '❌ Missing',
+                    'Access Token': token.access_token || 'Missing',
+                    'Refresh Token': token.refresh_token || 'Missing',
+                    'Token Access Type': token.refresh_token ? 'offline' : 'online/unknown',
                     'Expires In': token.expires_in ? `${token.expires_in} seconds` : 'Unknown',
                     'Token Type': token.token_type || 'Bearer',
                     'Scope': token.scope || 'Unknown',
